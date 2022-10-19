@@ -5,10 +5,10 @@ from torchvision import datasets
 from torchvision.transforms import ToTensor, ToPILImage
 from PIL import Image
 
+
 device = "cpu"
 
 loss_function = nn.CrossEntropyLoss()
-
 
 def adi():
     print('adi')
@@ -34,11 +34,54 @@ class cs19b001NN(nn.Module):
         return logits
 
 
+def train(dataloader, model, optimizer):
+    size = len(dataloader.dataset)
+    model.train()
+    for batch, (X, y) in enumerate(dataloader):
+        X, y = X.to(device), y.to(device)
+
+        # Compute prediction error
+        pred = model(X)
+        loss = loss_fn(pred, y)
+
+        # Backpropagation
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        if batch % 100 == 0:
+            loss, current = loss.item(), batch * len(X)
+            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+
+
+def test(dataloader, model):
+    size = len(dataloader.dataset)
+    num_batches = len(dataloader)
+    model.eval()
+    test_loss, correct = 0, 0
+    with torch.no_grad():
+        for X, y in dataloader:
+            X, y = X.to(device), y.to(device)
+            pred = model(X)
+            test_loss += loss_function(pred, y).item()
+            correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+    test_loss /= num_batches
+    correct /= size
+    print(
+        f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+
+
 # sample invocation torch.hub.load(myrepo,'get_model',train_data_loader=train_data_loader,n_epochs=5, force_reload=True)
 def get_model(train_data_loader=None, n_epochs=10):
     model = None
 
     model = cs19b001NN().to(device)
+    
+    optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
+
+    for t in range(n_epochs):
+        print(f"Epoch {t+1}\n-------------------------------")
+        train(train_data_loader, model, loss_function, optimizer)
 
     # write your code here as per instructions
     # ... your code ...
@@ -105,7 +148,8 @@ def test_model(model1=None, test_data_loader=None):
     correct /= size
 
 
-    print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+    print(f"Test Error: \nAccuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+
 
     accuracy_val = 100*correct
 
