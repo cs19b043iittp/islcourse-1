@@ -19,16 +19,22 @@ def adi():
 
 
 class cs19b001NN(nn.Module):
-    def __init__(self):
+    def __init__(self, m, n, pic_len):
         super(cs19b001NN, self).__init__()
         self.flatten = nn.Flatten()
+        self.m = m
+        self.n = n
+        self.pic_len = pic_len
+
         self.linear_relu_stack = nn.Sequential(
-            nn.Linear(28*28, 512),
+            nn.Linear(pic_len, pic_len),
             nn.ReLU(),
-            nn.Linear(512, 512),
+            nn.Linear(pic_len, 512),
             nn.ReLU(),
             nn.Linear(512, 10)
+
         )
+        self.softmax = torch.nn.Softmax()
 
     def forward(self, x):
         x = self.flatten(x)
@@ -77,7 +83,17 @@ def test(dataloader, model):
 def get_model(train_data_loader=None, n_epochs=10):
     model = None
 
-    model = cs19b001NN().to(device)
+
+
+    for X, y in train_data_loader:
+        X, y = X.to(device), y.to(device)
+        print("X and y shape", X.shape, y.shape)
+        m = X.shape[0]
+        n = X.shape[1]
+        pic_len = X.shape[2]*X.shape[3]
+        break
+    
+    model = cs19b001NN(m, n, pic_len).to(device)
 
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 
@@ -135,27 +151,28 @@ def test_model(model1=None, test_data_loader=None):
     # ... and so on ...
     # calculate accuracy, precision, recall and f1score
 
+    
+
     size = len(test_data_loader.dataset)
     num_batches = len(test_data_loader)
     model1.eval()
     test_loss, correct = 0, 0
 
-    total_positive_pred = 0
-    total_positive_actual = 0
+    # total_positive_pred = 0
+    # total_positive_actual = 0
 
     with torch.no_grad():
         for X, y in test_data_loader:
             X, y = X.to(device), y.to(device)
             pred = model1(X)
-            total_positive_pred += pred.argmax(1)
-            total_positive_actual += y
-            print(pred.argmax(1), y)
+            # total_positive_pred += pred.argmax(1)
+            # total_positive_actual += y
             test_loss += loss_function(pred, y).item()
             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
     
     test_loss /= num_batches
-    precision_val = correct / total_positive_pred
-    recall_val = correct / total_positive_actual
+    # precision_val = correct / total_positive_pred
+    # recall_val = correct / total_positive_actual
     correct /= size
 
     print(
