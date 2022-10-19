@@ -18,7 +18,7 @@ def adi():
 
 class cs19b001NN(nn.Module):
     def __init__(self):
-        super(NeuralNetwork, self).__init__()
+        super(cs19b001NN, self).__init__()
         self.flatten = nn.Flatten()
         self.linear_relu_stack = nn.Sequential(
             nn.Linear(28*28, 512),
@@ -38,7 +38,7 @@ class cs19b001NN(nn.Module):
 def get_model(train_data_loader=None, n_epochs=10):
     model = None
 
-    model = NeuralNetwork().to(device)
+    model = cs19b001NN().to(device)
 
     # write your code here as per instructions
     # ... your code ...
@@ -74,7 +74,6 @@ def get_model_advanced(train_data_loader=None, n_epochs=10, lr=1e-4, config=None
     # HINT: You can print sizes of tensors to get an idea of the size of the fc layer required
     # HINT: Flatten function can also be used if required
 
-
     print('Returning model... (rollnumber: xx)')
 
     return model
@@ -105,6 +104,12 @@ def test_model(model1=None, test_data_loader=None):
     test_loss /= num_batches
     correct /= size
 
+
+    print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+
+    accuracy_val = 100*correct
+
+    # f1score_val = 2*(recall_val * precision_val) / (recall_val + precision_val)
     print('Returning metrics... (rollnumber: cs19b001)')
 
     return accuracy_val, precision_val, recall_val, f1score_val
