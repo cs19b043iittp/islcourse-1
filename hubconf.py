@@ -1,3 +1,4 @@
+from functools import total_ordering
 import torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
@@ -9,6 +10,7 @@ from PIL import Image
 device = "cpu"
 
 loss_function = nn.CrossEntropyLoss()
+
 
 def adi():
     print('adi')
@@ -76,7 +78,7 @@ def get_model(train_data_loader=None, n_epochs=10):
     model = None
 
     model = cs19b001NN().to(device)
-    
+
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
 
     for t in range(n_epochs):
@@ -138,18 +140,26 @@ def test_model(model1=None, test_data_loader=None):
     model1.eval()
     test_loss, correct = 0, 0
 
+    total_positive_pred = 0
+    total_positive_actual = 0
+
     with torch.no_grad():
         for X, y in test_data_loader:
             X, y = X.to(device), y.to(device)
             pred = model1(X)
+            total_positive_pred += pred.argmax(1)
+            total_positive_actual += y
+            print(pred.argmax(1), y)
             test_loss += loss_function(pred, y).item()
             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+    
     test_loss /= num_batches
+    precision_val = correct / total_positive_pred
+    recall_val = correct / total_positive_actual
     correct /= size
 
-
-    print(f"Test Error: \nAccuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
-
+    print(
+        f"Test Error: \nAccuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
 
     accuracy_val = 100*correct
 
