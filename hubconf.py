@@ -81,7 +81,7 @@ def get_model(train_data_loader=None, n_epochs=10):
 
     for t in range(n_epochs):
         print(f"Epoch {t+1}\n-------------------------------")
-        train(train_data_loader, model, loss_function, optimizer)
+        train(train_data_loader, model, optimizer)
 
     # write your code here as per instructions
     # ... your code ...
