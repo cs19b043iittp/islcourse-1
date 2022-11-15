@@ -47,7 +47,7 @@ def create_dataloaders(training_data, test_data, batch_size=64):
     return train_dataloader, test_dataloader
 
 
-class cs19b003(nn.Module):
+class cs19b001(nn.Module):
     def __init__(self, config_param):
         super().__init__()
         self.config_param = config_param
