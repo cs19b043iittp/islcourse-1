@@ -1,48 +1,97 @@
-from functools import total_ordering
 import torch
 from torch import nn
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from torchvision import datasets
-from torchvision.transforms import ToTensor, ToPILImage
-from PIL import Image
+from torchvision.transforms import ToTensor
 
+# Get cpu or gpu device for training.
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"Using {device} device")
 
-device = "cpu"
+classes = [
+    "T-shirt/top",
+    "Trouser",
+    "Pullover",
+    "Dress",
+    "Coat",
+    "Sandal",
+    "Shirt",
+    "Sneaker",
+    "Bag",
+    "Ankle boot",
+]
 
-loss_function = nn.CrossEntropyLoss()
-
-
-def adi():
-    print('adi')
-
-# Define a neural network YOUR ROLL NUMBER (all small letters) should prefix the classname
-
-
-class cs19b001NN(nn.Module):
-    def __init__(self, m, n, pic_len):
-        super(cs19b001NN, self).__init__()
+# Define model
+class NeuralNetwork(nn.Module):
+    def __init__(self):
+        super(NeuralNetwork, self).__init__()
         self.flatten = nn.Flatten()
-        self.m = m
-        self.n = n
-        self.pic_len = pic_len
-
         self.linear_relu_stack = nn.Sequential(
-            nn.Linear(pic_len, pic_len),
+            nn.Linear(28*28, 512),
             nn.ReLU(),
-            nn.Linear(pic_len, 512),
+            nn.Linear(512, 512),
             nn.ReLU(),
             nn.Linear(512, 10)
-
         )
-        self.softmax = torch.nn.Softmax()
 
     def forward(self, x):
         x = self.flatten(x)
         logits = self.linear_relu_stack(x)
         return logits
 
+#############################
 
-def train(dataloader, model, optimizer):
+def get_lossfn_and_optimizer(mymodel):
+    loss_fn = nn.CrossEntropyLoss()
+    optimizer = torch.optim.SGD(mymodel.parameters(), lr=1e-3)
+    return loss_fn, optimizer
+
+
+def load_data():
+
+    # Download training data from open datasets.
+    training_data = datasets.FashionMNIST(
+        root="data",
+        train=True,
+        download=True,
+        transform=ToTensor(),
+    )
+
+    # Download test data from open datasets.
+    test_data = datasets.FashionMNIST(
+        root="data",
+        train=False,
+        download=True,
+        transform=ToTensor(),
+    )
+    
+    return training_data, test_data
+
+#############################
+
+def create_dataloaders(training_data, test_data, batch_size=64):
+
+    # Create data loaders.
+    train_dataloader = DataLoader(training_data, batch_size=batch_size)
+    test_dataloader = DataLoader(test_data, batch_size=batch_size)
+
+    for X, y in test_dataloader:
+        print(f"Shape of X [N, C, H, W]: {X.shape}")
+        print(f"Shape of y: {y.shape} {y.dtype}")
+        break
+        
+    return train_dataloader, test_dataloader
+  
+#############################
+
+def get_model():
+    
+    model = NeuralNetwork().to(device)
+
+    return model
+
+
+def _train(dataloader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
     model.train()
     for batch, (X, y) in enumerate(dataloader):
@@ -50,7 +99,7 @@ def train(dataloader, model, optimizer):
 
         # Compute prediction error
         pred = model(X)
-        loss = loss_function(pred, y)
+        loss = loss_fn(pred, y)
 
         # Backpropagation
         optimizer.zero_grad()
@@ -60,9 +109,8 @@ def train(dataloader, model, optimizer):
         if batch % 100 == 0:
             loss, current = loss.item(), batch * len(X)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
-
-
-def test(dataloader, model):
+            
+def _test(dataloader, model, loss_fn):
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
     model.eval()
@@ -71,116 +119,36 @@ def test(dataloader, model):
         for X, y in dataloader:
             X, y = X.to(device), y.to(device)
             pred = model(X)
-            test_loss += loss_function(pred, y).item()
+            test_loss += loss_fn(pred, y).item()
             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
     test_loss /= num_batches
     correct /= size
-    print(
-        f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
-
-
-# sample invocation torch.hub.load(myrepo,'get_model',train_data_loader=train_data_loader,n_epochs=5, force_reload=True)
-def get_model(train_data_loader=None, n_epochs=10):
-    model = None
-
-
-
-    for X, y in train_data_loader:
-        X, y = X.to(device), y.to(device)
-        print("X and y shape", X.shape, y.shape)
-        m = X.shape[0]
-        n = X.shape[1]
-        pic_len = X.shape[2]*X.shape[3]
-        break
+    print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
     
-    model = cs19b001NN(m, n, pic_len).to(device)
-
-    optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
-
-    for t in range(n_epochs):
+def train(train_dataloader, test_dataloader, model, loss_fn, optimizer, epochs=5):
+    for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
-        train(train_data_loader, model, optimizer)
+        train(train_dataloader, model, loss_fn, optimizer)
+        test(test_dataloader, model, loss_fn)
+    print("Done!")
 
-    # write your code here as per instructions
-    # ... your code ...
-    # ... your code ...
-    # ... and so on ...
-    # Use softmax and cross entropy loss functions
-    # set model variable to proper object, make use of train_data
+def save_model(mypath="model.pth"):
+    torch.save(model.state_dict(), "model.pth")
+    print("Saved PyTorch Model State to model.pth")
 
-    print('Returning model... (rollnumber: cs19b001)')
-
-    return model
-
-# sample invocation torch.hub.load(myrepo,'get_model_advanced',train_data_loader=train_data_loader,n_epochs=5, force_reload=True)
+def load_model(mypath="model.pth"):
+    model = NeuralNetwork()
+    model.load_state_dict(torch.load("model.pth"))
 
 
-def get_model_advanced(train_data_loader=None, n_epochs=10, lr=1e-4, config=None):
-    model = None
-
-    # write your code here as per instructions
-    # ... your code ...
-    # ... your code ...
-    # ... and so on ...
-    # Use softmax and cross entropy loss functions
-    # set model variable to proper object, make use of train_data
-
-    # In addition,
-    # Refer to config dict, where learning rate is given,
-    # List of (in_channels, out_channels, kernel_size, stride=1, padding='same')  are specified
-    # Example, config = [(1,10,(3,3),1,'same'), (10,3,(5,5),1,'same'), (3,1,(7,7),1,'same')], it can have any number of elements
-    # You need to create 2d convoution layers as per specification above in each element
-    # You need to add a proper fully connected layer as the last layer
-
-    # HINT: You can print sizes of tensors to get an idea of the size of the fc layer required
-    # HINT: Flatten function can also be used if required
-
-    print('Returning model... (rollnumber: xx)')
-
-    return model
-
-# sample invocation torch.hub.load(myrepo,'test_model',model1=model,test_data_loader=test_data_loader,force_reload=True)
-
-
-def test_model(model1=None, test_data_loader=None):
-
-    accuracy_val, precision_val, recall_val, f1score_val = 0, 0, 0, 0
-    # write your code here as per instructions
-    # ... your code ...
-    # ... your code ...
-    # ... and so on ...
-    # calculate accuracy, precision, recall and f1score
-
-    
-
-    size = len(test_data_loader.dataset)
-    num_batches = len(test_data_loader)
-    model1.eval()
-    test_loss, correct = 0, 0
-
-    # total_positive_pred = 0
-    # total_positive_actual = 0
-
+def sample_test(model, test_data):
+    model.eval()
+    x, y = test_data[0][0], test_data[0][1]
     with torch.no_grad():
-        for X, y in test_data_loader:
-            X, y = X.to(device), y.to(device)
-            pred = model1(X)
-            # total_positive_pred += pred.argmax(1)
-            # total_positive_actual += y
-            test_loss += loss_function(pred, y).item()
-            correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+        pred = model(x)
+        predicted, actual = classes[pred[0].argmax(0)], classes[y]
+        print(f'Predicted: "{predicted}", Actual: "{actual}"')
+        
+        
+        
     
-    test_loss /= num_batches
-    # precision_val = correct / total_positive_pred
-    # recall_val = correct / total_positive_actual
-    correct /= size
-
-    print(
-        f"Test Error: \nAccuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
-
-    accuracy_val = 100*correct
-
-    # f1score_val = 2*(recall_val * precision_val) / (recall_val + precision_val)
-    print('Returning metrics... (rollnumber: cs19b001)')
-
-    return accuracy_val, precision_val, recall_val, f1score_val
