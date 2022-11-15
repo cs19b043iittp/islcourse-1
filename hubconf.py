@@ -172,7 +172,7 @@ def test(dataloader, model, loss_fn):
 
 #write the get model
 def get_model(train_loader,e,lr,config_param=None):
-  model = cs19b003(config_param)
+  model = cs19b001(config_param)
   model=model.to(device)
   
   return model
