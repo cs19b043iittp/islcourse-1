@@ -80,12 +80,12 @@ def test(dataloader, model):
 
 
 # sample invocation torch.hub.load(myrepo,'get_model',train_data_loader=train_data_loader,n_epochs=5, force_reload=True)
-def get_model(train_data_loader=None, n_epochs=10):
+def get_model(train_data=None, n_epochs=10):
     model = None
 
 
 
-    for X, y in train_data_loader:
+    for X, y in train_data:
         X, y = X.to(device), y.to(device)
         print("X and y shape", X.shape, y.shape)
         m = X.shape[0]
@@ -99,7 +99,7 @@ def get_model(train_data_loader=None, n_epochs=10):
 
     for t in range(n_epochs):
         print(f"Epoch {t+1}\n-------------------------------")
-        train(train_data_loader, model, optimizer)
+        train(train_data, model, optimizer)
 
     # write your code here as per instructions
     # ... your code ...
