@@ -121,7 +121,7 @@ def get_metrics(model1, X=None, y=None):
 
     f1 = f1_score(y, y_pred, average='macro')
 
-    # auc = roc_auc_score(y_pred, y, multi_class='ovr',  average='macro')
+    auc = roc_auc_score(y_pred, y)
     # write your code here...
     return acc, prec, rec, f1, auc
 
