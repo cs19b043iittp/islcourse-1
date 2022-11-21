@@ -115,14 +115,11 @@ def get_metrics(model1, X=None, y=None):
 
     acc = accuracy_score(y, y_pred)
 
-    
-    prec =  precision_score(y, y_pred)
+    prec = precision_score(y, y_pred, average='macro')
 
-    
-    rec = recall_score(y, y_pred)
+    rec = recall_score(y, y_pred, average='macro')
 
-    
-    f1 = f1_score(y, y_pred)
+    f1 = f1_score(y, y_pred, average='macro')
 
     auc = roc_auc_score(y_pred, y, multi_class='ovr')
     # write your code here...
