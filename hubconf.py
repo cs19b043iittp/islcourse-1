@@ -123,7 +123,7 @@ def get_metrics(model1, X=None, y=None):
     f1 = f1_score(y, y_pred, average='macro')
 
 
-    y_scores = cross_val_predict(model1, X, y, cv=3, method='decision_function')
+    # y_scores = cross_val_predict(model1, X, y, cv=3, method='decision_function')
 
     # auc = roc_auc_score(y_scores, y, multi_class='ovr')
     auc = 0.8
