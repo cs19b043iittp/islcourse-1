@@ -15,6 +15,7 @@ import numpy as np
 from sklearn import cluster, datasets
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_predict
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
@@ -121,7 +122,10 @@ def get_metrics(model1, X=None, y=None):
 
     f1 = f1_score(y, y_pred, average='macro')
 
-    auc = roc_auc_score(y_pred, y)
+
+    y_scores = cross_val_predict(model1, X, y, cv=3, method='decision_function')
+
+    auc = roc_auc_score(y_scores, y, multi_class='ovr')
     # write your code here...
     return acc, prec, rec, f1, auc
 
