@@ -181,7 +181,7 @@ def perform_gridsearch_cv_multimetric(model1=None, param_grid=None, cv=5, X=None
     else:
         lg1 = LogisticRegression(C=params['C'], penalty=params['penalty'])
         lg1.fit(X, y)
-        acc, prec, rec, f1, auc = get_metrics(rfc1, X, y)
+        acc, prec, rec, f1, auc = get_metrics(lg1, X, y)
     # metrics = [] the evaluation program can change what metrics to choose
 
     # grid_search_cv = None
