@@ -52,7 +52,7 @@ def get_data_mnist():
     digits = datasets.load_digits()
     # write your code here
     # Refer to sklearn data sets
-    X, y = digits.images, digits.target
+    X, y = digits.data, digits.target
     # write your code ...
     return X, y
 
@@ -107,7 +107,7 @@ def build_rf_model(X=None, y=None):
     return rf_model
 
 
-def get_metrics(model1=None, X=None, y=None):
+def get_metrics(model1, X=None, y=None):
     pass
     # Obtain accuracy, precision, recall, f1score, auc score - refer to sklearn metrics
     y_pred = model1.predict(X)
