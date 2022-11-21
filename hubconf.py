@@ -27,8 +27,7 @@ from sklearn.metrics.cluster import homogeneity_score, v_measure_score, complete
 
 def get_data_blobs(n_points=100):
 
-    X, y = datasets.make_blobs(n_samples=n_points, n_features=2,
-                    centers=[[0, 0], [0, 10], [10, 0]])
+    X, y = datasets.make_blobs(n_samples=n_points,cluster_std=0.75, centers=4, random_state=1)
 
     # write your code here
     # Refer to sklearn data sets
@@ -38,7 +37,7 @@ def get_data_blobs(n_points=100):
 
 
 def get_data_circles(n_points=100):
-    X, y = datasets.make_circles(n_samples=n_points, noise=0.1)
+    X, y = datasets.make_circles(n_samples=n_points, noise=0.1, factor=.4)
 
     # write your code here
     # Refer to sklearn data sets
