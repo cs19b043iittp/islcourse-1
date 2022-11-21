@@ -1,4 +1,4 @@
-# Aditya
+# Aditya Sharma
 import torch
 from torch import nn
 import torch.optim as optim
@@ -11,13 +11,24 @@ import torch.optim as optim
 
 ###### PART 1 ######
 
+import numpy as np
 from sklearn import cluster, datasets
-from sklearn.datasets import load_digits
+from sklearn.linear_model import LogisticRegression
 
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+
+from sklearn.metrics import confusion_matrix, classification_report, precision_recall_curve, precision_recall_fscore_support
+from sklearn.preprocessing import label_binarize
+
+
+from sklearn.metrics.cluster import homogeneity_score, v_measure_score, completeness_score
 
 
 def get_data_blobs(n_points=100):
-    X, y = datasets.make_blobs(n_samples=n_points, centers=3, n_features=2, random_state=0)
+
+    X, y = datasets.make_blobs(n_samples=n_points, n_features=2,
+                    centers=[[0, 0], [0, 10], [10, 0]])
 
     # write your code here
     # Refer to sklearn data sets
@@ -27,7 +38,7 @@ def get_data_blobs(n_points=100):
 
 
 def get_data_circles(n_points=100):
-    X, y = datasets.make_circles(n_samples=n_points, factor=.4, noise=.1)
+    X, y = datasets.make_circles(n_samples=n_points, noise=0.1)
 
     # write your code here
     # Refer to sklearn data sets
@@ -37,10 +48,10 @@ def get_data_circles(n_points=100):
 
 
 def get_data_mnist():
-  digits = load_digits()
+  digits = datasets.load_digits()
   # write your code here
   # Refer to sklearn data sets
-  X, y = digits.data, digits.target
+  X, y = digits.images, digits.target
   # write your code ...
   return X, y
 
@@ -61,7 +72,7 @@ def assign_kmeans(km=None, X=None):
   # For each of the points in X, assign one of the means
   # refer to predict() function of the KMeans in sklearn
   # write your code ...
-  ypred = None
+  ypred = km.predict(X)
   return ypred
 
 
@@ -69,6 +80,10 @@ def compare_clusterings(ypred_1=None, ypred_2=None):
   pass
   # refer to sklearn documentation for homogeneity, completeness and vscore
   h, c, v = 0, 0, 0  # you need to write your code to find proper values
+
+  h = homogeneity_score(ypred_1, ypred_2)
+  c = completeness_score(ypred_1, ypred_2)
+  v = v_measure_score(ypred_1, ypred_2)
   return h, c, v
 
 ###### PART 2 ######
