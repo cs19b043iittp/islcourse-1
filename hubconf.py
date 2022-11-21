@@ -1,4 +1,4 @@
-# kali
+# Aditya
 import torch
 from torch import nn
 import torch.optim as optim
@@ -10,15 +10,14 @@ import torch.optim as optim
 # Avoid pip install requirement on the evaluation program side, if you use above packages and sub-packages of them, then that is fine!
 
 ###### PART 1 ######
-import sklearn
-from sklearn import cluster, datasets
-import sklearn.cluster as skl_cluster
 
+from sklearn import cluster, datasets
+from sklearn.datasets import load_digits
 
 
 
 def get_data_blobs(n_points=100):
-    X, y = datasets.make_blobs(n_samples=n_points, cluster_std=0.75, centers=4, random_state=1)
+    X, y = datasets.make_blobs(n_samples=n_points, centers=3, n_features=2, random_state=0)
 
     # write your code here
     # Refer to sklearn data sets
@@ -38,16 +37,16 @@ def get_data_circles(n_points=100):
 
 
 def get_data_mnist():
-  pass
+  digits = load_digits()
   # write your code here
   # Refer to sklearn data sets
-  X, y = None
+  X, y = digits.data, digits.target
   # write your code ...
   return X, y
 
 
 def build_kmeans(X=None, k=10):
-  km = skl_cluster.KMeans(n_clusters=k)
+  km = cluster.KMeans(n_clusters=k)
   km.fit(X)
 
   # k is a variable, calling function can give a different number
@@ -196,14 +195,14 @@ def get_mnist_tensor():
   return X, y
 
 
-def get_loss_on_single_point(mynn=None, x0, y0):
+def get_loss_on_single_point(mynn=None, x0=None, y0=None):
   y_pred, xencdec = mynn(x0)
   lossval = mynn.loss_fn(x0, y0, y_pred, xencdec)
   # the lossval should have grad_fn attribute set
   return lossval
 
 
-def train_combined_encdec_predictor(mynn=None, X, y, epochs=11):
+def train_combined_encdec_predictor(mynn=None, X=None, y=None, epochs=11):
   # X, y are provided as tensor
   # perform training on the entire data set (no batches etc.)
   # for each epoch, update weights
